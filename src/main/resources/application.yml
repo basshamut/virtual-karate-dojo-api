@@ -1,0 +1,22 @@
+api:
+  version: 1.0
+  title: Virtual Dojo REST API
+  description: Spring Boot REST API with Springdoc OpenAPI 3 for Virtual Dojo platform
+server:
+  port: 8080
+spring:
+  profiles:
+    active: ${PROFILE_ACTIVE}
+  main:
+    allow-circular-references: true
+  config:
+    name: application
+    location: classpath:/,classpath:/config/,file:./,file:./config/
+springdoc:
+  swagger-ui:
+    operationsSorter: method
+    tagsSorter: alpha
+security:
+  config:
+    jwt:
+      secret: secret1234

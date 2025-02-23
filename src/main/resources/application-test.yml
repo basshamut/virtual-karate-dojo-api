@@ -1,0 +1,13 @@
+spring:
+  jackson:
+    default-property-inclusion: NON_NULL
+  banner:
+    location: classpath:banner.txt
+  data:
+    mongodb:
+      uri: ${MONGODB_TEST_URL}
+      auto-index-creation: true
+      default-class: null
+  web:
+    resources:
+      add-mappings: true
