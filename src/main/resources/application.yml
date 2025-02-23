@@ -1,7 +1,3 @@
-api:
-  version: 1.0
-  title: Virtual Dojo REST API
-  description: Spring Boot REST API with Springdoc OpenAPI 3 for Virtual Dojo platform
 server:
   port: 8080
 spring:
@@ -16,7 +12,3 @@ springdoc:
   swagger-ui:
     operationsSorter: method
     tagsSorter: alpha
-security:
-  config:
-    jwt:
-      secret: secret1234

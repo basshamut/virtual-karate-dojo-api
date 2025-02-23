@@ -22,7 +22,6 @@ import com.virtual.karate.dojo.api.utils.Constants.LOGIN_URL
 @EnableWebSecurity
 @EnableMethodSecurity
 class SecurityConfig(
-    private val passwordEncoder: PasswordEncoder,
     private val customAuthenticationProvider: CustomAuthenticationProvider
 ) {
     private val whiteList = arrayOf(
@@ -60,3 +59,5 @@ class SecurityConfig(
         return JWTAuthorizationFilter(authenticationManager())
     }
 }
+
+//TODO completar la configuración de seguridad usando un controllador de autenticación (login)

@@ -7,7 +7,10 @@ spring:
     mongodb:
       uri: ${MONGODB_TEST_URL}
       auto-index-creation: true
-      default-class: null
   web:
     resources:
       add-mappings: true
+stripe:
+  secret-key: ${STRIPE_SECRET_KEY}
+urls:
+  frontend-url: ${FRONTEND_URL}
