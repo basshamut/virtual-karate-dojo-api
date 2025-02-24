@@ -23,37 +23,38 @@ class CustomAuthenticationProvider(
 
     override fun authenticate(authentication: Authentication): Authentication {
         val username = authentication.name
-        val attempts = cacheManagerLogin.getCache("LOGIN_ATTEMPTS_CACHE")?.get(username)
-        val attemptsValue: Int
+        val rawPassword = authentication.credentials as String
+        val passwordDecoded = Base64.getDecoder().decode(rawPassword ?: "").toString(Charsets.UTF_8)
 
+        val attempts = cacheManagerLogin.getCache("LOGIN_ATTEMPTS_CACHE")?.get(username)
         checkIfNumberOfPossibleAttemptsReached(attempts)
 
         val user = userService.loadUserByUsername(username)
             ?: throw UsernameNotFoundException("User not found!")
 
-        val apiPass = String(Base64.getDecoder().decode(authentication.credentials as String))
-        val dbPass = user.password
-
-        return if (username == user.username && passwordEncoder.matches(apiPass, dbPass)) {
+        if (passwordEncoder.matches(passwordDecoded, user.password)) {
             cacheManagerLogin.getCache("LOGIN_ATTEMPTS_CACHE")?.evict(username)
+
             val authorities: List<GrantedAuthority> = user.authorities.map { SimpleGrantedAuthority(it) }
-            UsernamePasswordAuthenticationToken(user.username, user.password, authorities)
+            return UsernamePasswordAuthenticationToken(user.username, rawPassword, authorities)
         } else {
-            if (attempts == null) {
-                cacheManagerLogin.getCache("LOGIN_ATTEMPTS_CACHE")?.put(username, 1)
-                throw BadCredentialsException("Incorrect username or password!")
-            }
-            attemptsValue = attempts.get() as Int
-            if (attemptsValue < 5) {
-                cacheManagerLogin.getCache("LOGIN_ATTEMPTS_CACHE")?.put(username, attemptsValue + 1)
-                throw BadCredentialsException("Incorrect username or password!")
-            }
-            throw BadCredentialsException("Number of possible attempts reached!")
+            handleFailedAttempt(username, attempts)
         }
+
+        throw BadCredentialsException("Incorrect username or password!")
+    }
+
+    private fun handleFailedAttempt(username: String, attempts: Cache.ValueWrapper?) {
+        val attemptsValue = (attempts?.get() as? Int) ?: 0
+        if (attemptsValue < 5) {
+            cacheManagerLogin.getCache("LOGIN_ATTEMPTS_CACHE")?.put(username, attemptsValue + 1)
+            throw BadCredentialsException("Incorrect username or password!")
+        }
+        throw BadCredentialsException("Number of possible attempts reached!")
     }
 
     override fun supports(authentication: Class<*>?): Boolean {
-        return true
+        return authentication == UsernamePasswordAuthenticationToken::class.java
     }
 
     companion object {

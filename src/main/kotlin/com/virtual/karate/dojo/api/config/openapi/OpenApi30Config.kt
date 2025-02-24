@@ -10,15 +10,20 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-@SecurityScheme(name = "bearerAuth", type = SecuritySchemeType.HTTP, bearerFormat = "JWT", scheme = "bearer")
+@SecurityScheme(name = "basicAuth", type = SecuritySchemeType.HTTP, scheme = "basic")
 class OpenApi30Config {
     @Bean
     fun customOpenAPI(): OpenAPI {
         return OpenAPI()
-                .components(Components().addSecuritySchemes("bearerAuth",
-                        io.swagger.v3.oas.models.security.SecurityScheme().type(io.swagger.v3.oas.models.security.SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")))
-                .info(Info().title("AsesorHub API").version("v1"))
-                .addSecurityItem(SecurityRequirement().addList("bearerAuth", mutableListOf("read", "write")))
+            .components(
+                Components().addSecuritySchemes(
+                    "basicAuth",
+                    io.swagger.v3.oas.models.security.SecurityScheme()
+                        .type(io.swagger.v3.oas.models.security.SecurityScheme.Type.HTTP)
+                        .scheme("basic")
+                )
+            )
+            .info(Info().title("Virtual Karate Dojo API").version("1.0.0"))
+            .addSecurityItem(SecurityRequirement().addList("basicAuth"))
     }
-
 }

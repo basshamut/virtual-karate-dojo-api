@@ -48,12 +48,6 @@ class UserService @Autowired constructor(
         return null
     }
 
-    fun login(email: String, password: String): Users? {
-        val user = userRepository.findByEmail(email) ?: return null
-        if (!user.validated!! || !passwordEncoder.matches(password, user.password)) return null
-        return user
-    }
-
     fun deleteByEmail(email: String) {
         userRepository.findByEmail(email)?.let { userRepository.delete(it) }
     }
