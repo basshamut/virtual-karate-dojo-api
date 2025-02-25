@@ -3,12 +3,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.asesorhub.api</groupId>
+    <groupId>com.virtual.karate.dojo.api</groupId>
     <artifactId>virtual-karate-dojo-api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
     <properties>
-        <java.version>17</java.version>
+        <java.version>21</java.version>
         <kotlin.version>2.0.20</kotlin.version>
         <spring.context.version>6.1.14</spring.context.version>
         <spring.boot.version>3.1.4</spring.boot.version>

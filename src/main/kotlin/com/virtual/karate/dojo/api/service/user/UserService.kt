@@ -17,11 +17,13 @@ class UserService @Autowired constructor(
 ) {
     fun save(user: Users): Users? {
         if (user.email?.let { userRepository.findByEmail(it) } == null) {
-            val hashedPassword = passwordEncoder.encode(user.password)
+            val hashedPassword = Base64.getEncoder().encodeToString(passwordEncoder.encode(user.password).toByteArray())
             val createdUser = userRepository.save(
                 user.copy(
                     password = hashedPassword,
-                    birthDate = user.birthDate?.let { Date(it.time) }
+                    birthDate = user.birthDate?.let { Date(it.time) },
+                    role = user.role ?: "USER",
+                    active = true,
                 )
             )
 

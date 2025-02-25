@@ -1,0 +1,74 @@
+name: Deploy to Docker on VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # 1️⃣ Checkout del repositorio
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2️⃣ Configurar Java 21 (según `pom.xml`)
+      - name: Set up Java 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      # 3️⃣ Compilar la aplicación con Maven (omitiendo tests)
+      - name: Build with Maven
+        run: mvn clean package -DskipTests
+
+      # 4️⃣ Extraer el nombre del artefacto basado en `pom.xml`
+      - name: Extract artifact name
+        run: echo "JAR_FILE=virtual-karate-dojo-api-0.0.1-SNAPSHOT.jar" >> $GITHUB_ENV
+
+      # 5️⃣ Construir la imagen Docker con el `JAR_FILE`
+      - name: Build Docker image
+        run: docker build -t virtual-karate-dojo-api:latest --build-arg JAR_FILE=${{ env.JAR_FILE }} .
+
+      # 6️⃣ Guardar la imagen Docker en un tarball
+      - name: Save Docker image as tarball
+        run: docker save virtual-karate-dojo-api:latest > virtual-karate-dojo-api.tar
+
+      # 7️⃣ Copiar el tarball a la VPS
+      - name: Copy Docker image tarball to VPS
+        uses: appleboy/scp-action@v0.1.0
+        with:
+          host: ${{ secrets.VPS_SSH_HOST }}
+          username: ${{ secrets.VPS_SSH_USERNAME }}
+          password: ${{ secrets.VPS_SSH_PASSWORD }}
+          port: 22
+          source: "virtual-karate-dojo-api.tar"
+          target: "/home/${{ secrets.VPS_SSH_USERNAME }}/"
+
+      # 8️⃣ Conectarse vía SSH a la VPS y desplegar el contenedor
+      - name: Deploy Docker Container via SSH
+        uses: appleboy/ssh-action@v0.1.0
+        with:
+          host: ${{ secrets.VPS_SSH_HOST }}
+          username: ${{ secrets.VPS_SSH_USERNAME }}
+          password: ${{ secrets.VPS_SSH_PASSWORD }}
+          port: 22
+          script: |
+            # Eliminar cualquier contenedor existente con el mismo nombre
+            docker rm -f virtual-karate-dojo-api || true
+            # Eliminar imagen anterior
+            docker rmi -f virtual-karate-dojo-api:latest || true
+
+            # Cargar la nueva imagen Docker
+            docker load -i /home/${{ secrets.VPS_SSH_USERNAME }}/virtual-karate-dojo-api.tar
+
+            # Ejecutar el contenedor con variables de entorno y mapeo de puertos
+            docker run -d \
+              --name virtual-karate-dojo-api \
+              -p 8080:8080 \
+              -e PROFILE_ACTIVE="${{ secrets.PROFILE_ACTIVE }}" \
+              -e MONGODB_URL="${{ secrets.MONGODB_URL }}" \
+              -e MONGODB_TEST_URL="${{ secrets.MONGODB_TEST_URL }}" \
+              virtual-karate-dojo-api:latest

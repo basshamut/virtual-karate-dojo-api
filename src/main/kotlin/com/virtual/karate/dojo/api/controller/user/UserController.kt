@@ -10,6 +10,7 @@ import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDate
+import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -36,17 +37,22 @@ class UserController(private val userService: UserService) {
             errors["user"] = "El formato del email no es válido"
         }
 
-        val today = Calendar.getInstance()
-        today.add(Calendar.YEAR, -18)
-        val majorityAgeDate = today.time
-
-        if (request.date.isNullOrEmpty()) {
-            errors["date"] = "La fecha de nacimiento es requerida"
-        } else {
-            val userDate = Date(request.date)
-            if (userDate.after(majorityAgeDate)) {
-                errors["date"] = "Debes ser mayor de 18 años"
+        val majorityAgeDate = LocalDate.now().minusYears(18)
+        val birthDate: LocalDate? = request.date?.let {
+            try {
+                val formatter = DateTimeFormatter.ISO_DATE_TIME // 📌 Ahora acepta `T23:00:00.000Z`
+                val offsetDateTime = OffsetDateTime.parse(it, formatter)
+                offsetDateTime.toLocalDate() // 📌 Convertimos a `LocalDate`
+            } catch (e: Exception) {
+                errors["date"] = "Formato de fecha inválido"
+                null
             }
+        }
+
+        if (birthDate == null) {
+            errors["date"] = "La fecha de nacimiento es requerida"
+        } else if (birthDate.isAfter(majorityAgeDate)) {
+            errors["date"] = "Debes ser mayor de 18 años"
         }
 
         if (request.password.isNullOrEmpty()) {
@@ -59,12 +65,10 @@ class UserController(private val userService: UserService) {
             return ResponseEntity.badRequest().body(mapOf("errors" to errors))
         }
 
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val localDate = request.date?.let { LocalDate.parse(it, formatter) }
-        val birthDay: Date = Date.from(localDate?.atStartOfDay(ZoneId.systemDefault())!!.toInstant())
-
+        val birthDay: Date = Date.from(birthDate!!.atStartOfDay(ZoneId.systemDefault()).toInstant())
         val newUser = Users(email = request.user, password = request.password, birthDate = birthDay)
         val userFound = userService.save(newUser)
+
         return if (userFound == null) {
             ResponseEntity.status(409).body(mapOf("message" to "El email ya está registrado"))
         } else {
@@ -74,7 +78,7 @@ class UserController(private val userService: UserService) {
 
     @PostMapping("/login")
     fun login(@Valid @RequestBody request: LoginRequestDto): ResponseEntity<Any> {
-        val userFound = request.username?.let { userService.findByEmail(it) }
+        val userFound = request.user?.let { userService.findByEmail(it) }
 
         return if (userFound == null) {
             ResponseEntity.status(404).body(mapOf("message" to "Usuario no encontrado"))

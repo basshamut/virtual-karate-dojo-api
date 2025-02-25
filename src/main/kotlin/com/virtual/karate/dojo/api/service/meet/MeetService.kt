@@ -15,7 +15,8 @@ class MeetService @Autowired constructor(
         if (meet.meetDate?.before(Date.from(Instant.now())) == true) {
             throw IllegalArgumentException("Fecha no proporcionada o inválida")
         }
-        return meetRepository.save(meet)
+        val newMeet = meet.copy(active = true)
+        return meetRepository.save(newMeet)
     }
 
     fun getAll(): List<Meets> {

@@ -3,6 +3,7 @@ package com.virtual.karate.dojo.api.controller.stripe
 import com.stripe.model.checkout.Session
 import com.stripe.param.checkout.SessionCreateParams
 import com.virtual.karate.dojo.api.service.meet.MeetService
+import com.virtual.karate.dojo.api.utils.Constants.API_VERSION_PATH
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -12,10 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/stripe")
+@RequestMapping("$API_VERSION_PATH/stripe")
 class StripeController @Autowired constructor(
     private val meetService: MeetService,
-    private val stripeApiKey: String,
     private val frontendUrl: String
 ) {
     @PostMapping("/create-checkout-session")

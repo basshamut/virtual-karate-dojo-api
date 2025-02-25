@@ -6,7 +6,6 @@ import java.util.*
 @Document("meets")
 data class Meets(
     var id: String? = null,
-    var meetId: Int? = null,
     var meetUrl: String? = null,
     var meetDate: Date? = null,
     var price: Double? = null,

@@ -11,11 +11,12 @@ import java.io.IOException
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
-class SimpleCORSFilter: Filter {
+class SimpleCORSFilter : Filter {
 
-    fun SimpleCORSFilter() {
-        val log = LoggerFactory.getLogger(SimpleCORSFilter::class.java)
-        log.info("SimpleCORSFilter init")
+    private val log = LoggerFactory.getLogger(SimpleCORSFilter::class.java)
+
+    init {
+        log.info("SimpleCORSFilter initialized")
     }
 
     @Throws(IOException::class, ServletException::class)
@@ -23,21 +24,28 @@ class SimpleCORSFilter: Filter {
         val request = req as HttpServletRequest
         val response = res as HttpServletResponse
 
-        response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"))
+        val origin = request.getHeader("Origin") ?: "*"
+
+        response.setHeader("Access-Control-Allow-Origin", origin)
         response.setHeader("Access-Control-Allow-Credentials", "true")
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PUT, PATCH")
         response.setHeader("Access-Control-Max-Age", "3600")
-        response.setHeader("Access-Control-Allow-Headers", "Authorization,Content-Type, Accept, X-Requested-With, remember-me")
+        response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, Accept, X-Requested-With, remember-me")
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition, Authorization")
+
+        if ("OPTIONS".equals(request.method, ignoreCase = true)) {
+            response.status = HttpServletResponse.SC_OK
+            return
+        }
+
         chain.doFilter(req, res)
     }
 
     override fun init(filterConfig: FilterConfig?) {
-        // NOOP
+        // No se necesita implementación
     }
 
     override fun destroy() {
-        // NOOP
+        // No se necesita implementación
     }
-
 }

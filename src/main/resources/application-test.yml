@@ -14,3 +14,12 @@ stripe:
   secret-key: ${STRIPE_SECRET_KEY}
 urls:
   frontend-url: ${FRONTEND_URL}
+cloudinary:
+  cloud_name: ${CLOUDINARY_CLOUD_NAME}
+  api_key: ${CLOUDINARY_CLOUD_API_KEY}
+  api_secret: ${CLOUDINARY_CLOUD_API_SECRET}
+email:
+  host: ${EMAIL_HOST:smtp.gmail.com}
+  user: ${EMAIL_USER:default@example.com}
+  pass: ${EMAIL_PASS:defaultpassword}
+  port: 587

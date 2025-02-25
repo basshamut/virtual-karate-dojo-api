@@ -1,5 +1,6 @@
 package com.virtual.karate.dojo.api.config.mail
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.mail.javamail.JavaMailSender
@@ -8,13 +9,26 @@ import java.util.*
 
 @Configuration
 class MailConfig {
+
+    @Value("\${email.host}")
+    private lateinit var emailHost: String
+
+    @Value("\${email.user}")
+    private lateinit var emailUser: String
+
+    @Value("\${email.pass}")
+    private lateinit var emailPass: String
+
+    @Value("\${email.port}")
+    private var emailPort: Int = 587
+
     @Bean
     fun javaMailSender(): JavaMailSender {
         val mailSender = JavaMailSenderImpl()
-        mailSender.host = System.getenv("EMAIL_HOST") ?: "smtp.gmail.com"
-        mailSender.port = 587
-        mailSender.username = System.getenv("EMAIL_USER") ?: "default@example.com"
-        mailSender.password = System.getenv("EMAIL_PASS") ?: "defaultpassword"
+        mailSender.host = emailHost
+        mailSender.port = emailPort
+        mailSender.username = emailUser
+        mailSender.password = emailPass
 
         val props: Properties = mailSender.javaMailProperties
         props["mail.transport.protocol"] = "smtp"
@@ -28,3 +42,4 @@ class MailConfig {
         return mailSender
     }
 }
+

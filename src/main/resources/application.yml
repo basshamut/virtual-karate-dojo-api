@@ -8,6 +8,10 @@ spring:
   config:
     name: application
     location: classpath:/,classpath:/config/,file:./,file:./config/
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
 springdoc:
   swagger-ui:
     operationsSorter: method
