@@ -1,5 +1,7 @@
 server:
   port: 8080
+  servlet:
+    context-path: /virtual-karate-dojo-api
 spring:
   profiles:
     active: ${PROFILE_ACTIVE}
