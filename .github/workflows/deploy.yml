@@ -56,15 +56,16 @@ jobs:
             docker rm -f virtual-karate-dojo-api || true
             # Eliminar la imagen existente con el mismo tag (si existe)
             docker rmi -f virtual-karate-dojo-api:latest || true
-
+            
+            # Guardar el archivo .env en la VPS desde GitHub Secrets
+            echo "${{ secrets.ENV_FILE }}" > /home/${{ secrets.VPS_SSH_USERNAME }}/.env
+            
             # Cargar la nueva imagen Docker desde el tarball
             docker load -i /home/${{ secrets.VPS_SSH_USERNAME }}/virtual-karate-dojo-api.tar
-
-            # Ejecutar el contenedor con las variables de entorno y mapeo de puertos
+            
+            # Ejecutar el contenedor con el archivo .env
             docker run -d \
               --name virtual-karate-dojo-api \
               -p 8082:8080 \
-              -e PROFILE_ACTIVE="${{ secrets.PROFILE_ACTIVE }}" \
-              -e MONGODB_URL="${{ secrets.MONGODB_URL }}" \
-              -e MONGODB_TEST_URL="${{ secrets.MONGODB_TEST_URL }}" \
+              --env-file /home/${{ secrets.VPS_SSH_USERNAME }}/.env \
               virtual-karate-dojo-api:latest
