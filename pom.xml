@@ -321,14 +321,17 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>${java.version}</source> <!-- Cambiado a 17 -->
-                    <target>${java.version}</target> <!-- Cambiado a 17 -->
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring.boot.version}</version>
+                <configuration>
+                    <mainClass>com.virtual.karate.dojo.api.VirtualKarateDojoApiApplication</mainClass>
+                </configuration>
             </plugin>
         </plugins>
     </build>
