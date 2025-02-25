@@ -63,7 +63,7 @@ jobs:
             # Ejecutar el contenedor con las variables de entorno y mapeo de puertos
             docker run -d \
               --name virtual-karate-dojo-api \
-              -p 8080:8080 \
+              -p 8082:8080 \
               -e PROFILE_ACTIVE="${{ secrets.PROFILE_ACTIVE }}" \
               -e MONGODB_URL="${{ secrets.MONGODB_URL }}" \
               -e MONGODB_TEST_URL="${{ secrets.MONGODB_TEST_URL }}" \
