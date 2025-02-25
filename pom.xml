@@ -330,7 +330,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring.boot.version}</version>
                 <configuration>
-                    <mainClass>com.virtual.karate.dojo.api.VirtualKarateDojoApiApplication</mainClass>
+                    <mainClass>com.virtual.karate.dojo.api.MainApplication</mainClass>
                 </configuration>
             </plugin>
         </plugins>
