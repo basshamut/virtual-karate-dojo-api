@@ -1,7 +1,7 @@
 package com.virtual.karate.dojo.api.utils
 
 object Constants {
-    const val API_VERSION_PATH = "/api/v1"
+    const val API_VERSION_PATH = "/v1"
 
     // Auth
     const val LOGIN_PATH = "/login"
