@@ -22,7 +22,7 @@ jobs:
         run: mvn clean package -DskipTests
 
       - name: Build Docker image
-        run: docker build -t gruastremart-core-api:latest .
+        run: docker build -t virtual-karate-dojo-api:latest .
 
       - name: Save Docker image as tarball
         run: docker save virtual-karate-dojo-api:latest > virtual-karate-dojo-api.tar
