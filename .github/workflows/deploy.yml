@@ -59,7 +59,7 @@ jobs:
             docker load -i /home/${{ secrets.VPS_SSH_USERNAME }}/virtual-karate-dojo-api.tar
             docker run -d \
               --name virtual-karate-dojo-api \
-              -p 8083:8080 \
+              -p 8082:8080 \
               --env-file /home/${{ secrets.VPS_SSH_USERNAME }}/.env \
               virtual-karate-dojo-api:latest
           EOF
