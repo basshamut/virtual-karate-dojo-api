@@ -4,7 +4,7 @@ server:
     context-path: /virtual-karate-dojo-api
 spring:
   profiles:
-    active: ${PROFILE_ACTIVE}
+    active: ${SPRING_PROFILES_ACTIVE}
   main:
     allow-circular-references: true
   config:

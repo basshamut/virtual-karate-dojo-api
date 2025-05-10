@@ -7,7 +7,7 @@ Swagger (Local) -> http://localhost:8080/swagger-ui/index.html?configUrl=/v3/api
 Crea un archivo `.env` en la raíz del proyecto con las siguientes variables:
 
 ```env
-PROFILE_ACTIVE=[PERFIL ACTIVO local|test|dev|pre|pro]
+SPRING_PROFILES_ACTIVE=[PERFIL ACTIVO local|test|dev|pre|pro]
 MONGODB_URL=[URL PARA DB DE LOCAL/DEV/PRE/PRO]
 MONGODB_TEST_URL=[URL PARA DB DE PRUEBAS]
 ```

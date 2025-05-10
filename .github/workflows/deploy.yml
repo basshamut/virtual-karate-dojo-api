@@ -1,4 +1,4 @@
-name: Deploy to Docker on VPS
+name: Deploy to k3s on VPS
 
 on:
   push:
@@ -9,62 +9,71 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
+      # 🔄 1. Clonar el repositorio
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # ☕ 2. Configurar Java 21
       - name: Set up Java 21
         uses: actions/setup-java@v3
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: "21"
 
+      # ⚙️ 3. Compilar el proyecto con Maven
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
+      # 🐳 4. Construir la imagen Docker
       - name: Build Docker image
         run: docker build -t virtual-karate-dojo-api:latest .
 
+      # 🧱 5. Guardar la imagen como tarball
       - name: Save Docker image as tarball
         run: docker save virtual-karate-dojo-api:latest > virtual-karate-dojo-api.tar
 
-      # 🔐 Descifrar clave privada SSH
+      # 🔐 6. Descifrar clave privada SSH
       - name: Decrypt SSH private key
         run: |
           gpg --batch --yes --passphrase "${{ secrets.GPG_PASSPHRASE }}" \
             -o ./private_key -d .github/secrets/secrets.gpg
           chmod 600 ./private_key
 
-      # ✅ Validar que los secretos críticos existan
+      # ✅ 7. Validar existencia de secretos requeridos
       - name: Validar existencia de secretos requeridos
         run: |
-          if [ -z "${{ secrets.VPS_SSH_USERNAME }}" ] || [ -z "${{ secrets.VPS_SSH_HOST }}" ] || [ -z "${{ secrets.ENV_FILE }}" ]; then
+          if [ -z "${{ secrets.VPS_SSH_USERNAME }}" ] || [ -z "${{ secrets.VPS_SSH_HOST }}" ]; then
             echo "❌ Faltan uno o más secretos obligatorios."
             exit 1
           fi
 
-      # 📦 Copiar imagen manualmente al VPS
+      # 📦 8. Copiar imagen al VPS con scp
       - name: Copy Docker image tarball manually using scp
         run: |
           scp -i ./private_key -o StrictHostKeyChecking=no \
             virtual-karate-dojo-api.tar \
             ${{ secrets.VPS_SSH_USERNAME }}@${{ secrets.VPS_SSH_HOST }}:/home/${{ secrets.VPS_SSH_USERNAME }}/
 
-      # 🚀 Desplegar en el VPS manualmente
-      - name: Deploy Docker container manually
+      # 🚀 9. Desplegar en k3s usando el .env local del VPS
+      - name: Deploy to k3s manually
         run: |
           ssh -i ./private_key -o StrictHostKeyChecking=no ${{ secrets.VPS_SSH_USERNAME }}@${{ secrets.VPS_SSH_HOST }} << 'EOF'
-            docker rm -f virtual-karate-dojo-api || true
-            docker rmi -f virtual-karate-dojo-api:latest || true
-            echo "${{ secrets.ENV_FILE }}" > /home/${{ secrets.VPS_SSH_USERNAME }}/.env
-            docker load -i /home/${{ secrets.VPS_SSH_USERNAME }}/virtual-karate-dojo-api.tar
-            docker run -d \
-              --name virtual-karate-dojo-api \
-              -p 8082:8080 \
-              --env-file /home/${{ secrets.VPS_SSH_USERNAME }}/.env \
-              virtual-karate-dojo-api:latest
+            # Importar la imagen al containerd de k3s
+            sudo k3s ctr images import /home/${{ secrets.VPS_SSH_USERNAME }}/virtual-karate-dojo-api.tar
+
+            # Crear o actualizar el Secret desde el .env local
+            sudo kubectl create secret generic gruastremart-core-env \
+              --from-file=.env=/home/k3s-deployments/virtual-karate-dojo-api/.env \
+              --dry-run=client -o yaml | sudo kubectl apply -f -
+
+            # Aplicar el deployment si aún no existe o se ha actualizado
+            sudo kubectl apply -f /home/k3s-deployments/virtual-karate-dojo-api/deploy-virtual-karate-dojo-api.yml
+
+            # Reiniciar el deployment para que coja la nueva imagen y config
+            sudo kubectl rollout restart deployment virtual-karate-dojo-api
           EOF
 
-      # 🗑️ Limpiar clave privada
+      # 🧹 10. Limpiar clave privada
       - name: Cleanup private key
         if: always()
         run: rm -f ./private_key
