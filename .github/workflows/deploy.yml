@@ -62,7 +62,7 @@ jobs:
             sudo k3s ctr images import /home/${{ secrets.VPS_SSH_USERNAME }}/virtual-karate-dojo-api.tar
 
             # Crear o actualizar el Secret desde el .env local
-            sudo kubectl create secret generic gruastremart-core-env \
+            sudo kubectl create secret generic virtual-karate-dojo-env \
               --from-file=.env=/home/k3s-deployments/virtual-karate-dojo-api/.env \
               --dry-run=client -o yaml | sudo kubectl apply -f -
 
